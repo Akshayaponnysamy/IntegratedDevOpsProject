@@ -20,7 +20,13 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running application tests'
-                bat 'docker run --rm -v "%CD%:/workspace" alpine:latest sh -c "cd /workspace && sh test/test.sh"'
+
+                bat '''
+                if not exist index.html exit /b 1
+                findstr /C:"Integrated DevOps Project" index.html
+                if errorlevel 1 exit /b 1
+                echo All application tests passed successfully.
+                '''
             }
         }
 
