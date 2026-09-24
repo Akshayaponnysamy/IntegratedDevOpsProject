@@ -30,18 +30,39 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Ansible Configuration') {
             steps {
-                echo 'Deploying application using Ansible'
+                echo 'Running Ansible configuration management'
 
                 bat '''
                 docker run --rm ^
                 -v "%CD%:/ansible/project" ^
-                -v //var/run/docker.sock:/var/run/docker.sock ^
                 williamyeh/ansible:alpine3 ^
                 ansible-playbook ^
                 -i /ansible/project/ansible/inventory ^
                 /ansible/project/ansible/deploy.yml
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying Docker container'
+
+                bat '''
+                docker rm -f integrated-devops-app 2>nul
+                docker run -d --name integrated-devops-app -p 8085:80 integrated-devops-app:latest
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                echo 'Verifying deployed container'
+
+                bat '''
+                docker ps --filter "name=integrated-devops-app"
+                echo Application deployed on http://localhost:8085
                 '''
             }
         }

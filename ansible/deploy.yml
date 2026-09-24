@@ -6,14 +6,15 @@
 
   tasks:
 
-    - name: Stop existing application container
-      command: docker rm -f integrated-devops-app
-      failed_when: false
-      changed_when: true
-
-    - name: Deploy Docker container
-      command: docker run -d --name integrated-devops-app -p 8085:80 integrated-devops-app:latest
-
-    - name: Display deployment message
+    - name: Display deployment information
       debug:
-        msg: "Integrated DevOps application deployed successfully on port 8085"
+        msg: "Ansible deployment stage executed successfully."
+
+    - name: Verify Docker socket is available
+      stat:
+        path: /var/run/docker.sock
+      register: docker_socket
+
+    - name: Display Docker socket status
+      debug:
+        msg: "Docker socket is available: {{ docker_socket.stat.exists }}"
